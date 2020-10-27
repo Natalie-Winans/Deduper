@@ -1,0 +1,102 @@
+------------------------
+| Deduper - Pseudocode |
+------------------------
+
+The problem:
+
+Given a SAM file, we want to remove PCR-duplicated sequences. These can be identified by comparing the following fields in each line of the alignment secion:
+    • QNAME (column 1): contains UMIs (in this case)
+    • FLAG (column 2): strand information     
+    • RNAME (column 3): chromosome/scaffold/group
+    • POS (column 4): 1-based leftmost position in bp
+    • CIGAR string (column 6): to identify soft clipping
+
+To be considered a PCR duplicate, two reads must have identical UMIs, have the same chromosome or scaffold, and have the same base position, accounting for any soft clipping. We want to save the first of any duplicated reads and discard the rest. We will also filter out reads with low-quality (N-containing) or unkonwn UMIs. 
+
+Input:
+    • SAM file
+
+Output:
+    • SAM file containing deduplicated reads
+    • SAM file containing discarded duplicate reads
+    • SAM file containing discarded reads with low-quality UMIs
+
+Functions:
+
+def get_args():
+    '''Takes user-input arguments for input SAM files'''
+    • add argument --file: input SAM file
+    • add argument --umi: file with list of UMIs
+    return parser.parse_args()
+
+def position_fw(line):
+    '''Takes line of SAM file and, if soft clipped on the left (based on CIGAR string), returns soft-clipping adjusted position, otherwise returns POS'''
+    • extract POS
+    • extract and parse CIGAR string
+        - if soft clipped:
+            • subtract soft clipping from POS
+            • return new position
+        - else: 
+            • return new_POS
+Test example:
+POS = 76814284
+CIGAR = 3S25M470N46M
+return new_POS = 76814281
+
+def position_rv(line):
+    '''Takes line of SAM file and, if soft clipped on the right (based on CIGAR string), returns soft-clipping adjusted position, otherwise returns POS'''
+    • extract POS
+    • extract and parse CIGAR string
+        - if soft clipped:
+            • subtract soft clipping from POS
+            • return new position
+        - else: 
+            • return new_POS
+Test example:
+POS = 76814284
+CIGAR = 25M470N46M3S
+return new_POS = 76814281
+
+
+Main code:
+
+sort input SAM file by coordinates using samtools
+
+with open umi file:
+    create dictionary to hold known UMIs
+
+open output files:
+    <input file name>_deduped.sam
+    <input file name>_disc_dups.sam
+    <input file name>_umi_qual.sam
+
+with open sorted SAM input file:
+    Read in line
+        if line begins with @:
+            write to outfile (header)
+        else: 
+            split line by tab delimiter
+            • extract umi from first field
+            • check to see if umi in umi_dict
+                - if not:
+                    • write line to umi_qual outfile
+                    • go to next line
+                - if so, extract bitwise flag from second field
+                    • Parse bitwise flag
+                            - if read aligned to forward strand
+                                • save position by calling position_fw(line)
+                            - if read aligned to reverse strand
+                                • save position by calling position_rv(line)
+                    • save rname from third field
+                    - if this is first line, output to deduped file and continue to next line
+                    -otherwise:
+                        - check rname, if different from last line:
+                            • output line to deduped and continue to next line
+                        - if rname is the same, check position
+                                • if same as last line, output to duplicates file
+                                • if different, output to deduped file
+                                • continue to next line
+                            
+close all ouput files
+
+print output statistics
