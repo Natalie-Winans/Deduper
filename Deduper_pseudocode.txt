@@ -4,14 +4,14 @@
 
 The problem:
 
-Given a SAM file, we want to remove PCR-duplicated sequences. These can be identified by comparing the following fields in each line of the alignment secion:
+Given a SAM file, we want to remove PCR-duplicated sequences. These can be identified by comparing the following fields\n in each line of the alignment secion:
     • QNAME (column 1): contains UMIs (in this case)
     • FLAG (column 2): strand information     
     • RNAME (column 3): chromosome/scaffold/group
     • POS (column 4): 1-based leftmost position in bp
     • CIGAR string (column 6): to identify soft clipping
 
-To be considered a PCR duplicate, two reads must have identical UMIs, have the same chromosome or scaffold, and have the same base position, accounting for any soft clipping. We want to save the first of any duplicated reads and discard the rest. We will also filter out reads with low-quality (N-containing) or unkonwn UMIs. 
+To be considered a PCR duplicate, two reads must have identical UMIs, have the same chromosome or scaffold, and have the\n same base position, accounting for any soft clipping. We want to save the first of any duplicated reads and discard\n the rest. We will also filter out reads with low-quality (N-containing) or unkonwn UMIs. 
 
 Input:
     • SAM file
@@ -44,7 +44,7 @@ CIGAR = 3S25M470N46M
 return new_POS = 76814281
 
 def position_rv(line):
-    '''Takes line of SAM file and, if soft clipped on the right (based on CIGAR string), returns soft-clipping adjusted position, otherwise returns POS'''
+    '''Takes line of SAM file and, if soft clipped on the right (based on CIGAR string), returns soft-clipping adjusted\n position, otherwise returns POS'''
     • extract POS
     • extract and parse CIGAR string
         - if soft clipped:
