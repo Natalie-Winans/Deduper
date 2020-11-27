@@ -10,20 +10,14 @@ def get_args():
         parser.add_argument('-f', '--file', help = "input SAM file", required = True)
         parser.add_argument('-u', '--umi', help = "file containing UMIs", required = True)
         parser.add_argument('-p', '--paired', action = 'store_true', help = "paired-end data")
-        parser.add_argument('-h', '--help', action = 'store_true', help = "useful help message")
         return parser.parse_args() 
 args = get_args()
 in_sam = args.file
 umi_file = args.umi
 paired = args.paired
-help = args.help
 
 #extract input filename for output files
 filename = os.path.basename(in_sam).split('.')[0]
-
-if help is True:
-    print("help message")
-    exit()
 
 if paired is True:
     print("Error: this program not compatible with paired-end data at this time")
