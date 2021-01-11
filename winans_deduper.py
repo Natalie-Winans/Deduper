@@ -24,7 +24,8 @@ if paired is True:
     exit()
 
 def position_fw(line):
-    """Takes line of SAM file mapped to forward strand and, if soft clipped, returns soft-clipping adjusted postion, otherwise returns POS"""
+    """Takes line of SAM file mapped to forward strand and, if soft clipped, 
+    returns soft-clipping adjusted postion, otherwise returns POS"""
     pos = int(line.split('\t')[3])
     CIGAR = line.split('\t')[5]
     if "S" in CIGAR:
@@ -38,7 +39,8 @@ def position_fw(line):
         return(pos)
     
 def position_rv(line):
-    """Takes line of SAM file mapped to reverse strand and adds matches, mismatches, deletions, introns, and right soft-clipping to POS, returns adjusted position"""
+    """Takes line of SAM file mapped to reverse strand and adds matches, mismatches,
+    deletions, introns, and right soft-clipping to POS, returns adjusted position"""
     pos = int(line.split('\t')[3])
     CIGAR = line.split('\t')[5]
     adj = [int(i[:-1]) for i in re.findall("\d+S$|\d+M|\d+D|\d+N", CIGAR)]
