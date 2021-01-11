@@ -38,18 +38,13 @@ def position_fw(line):
         return(pos)
     
 def position_rv(line):
-    """Takes line of SAM file mapped to reverse strand and, if soft clipped, returns soft-clipping adjusted postion, otherwise returns POS"""
+    """Takes line of SAM file mapped to reverse strand and adds matches, mismatches, deletions, introns, and right soft-clipping to POS, returns adjusted position"""
     pos = int(line.split('\t')[3])
     CIGAR = line.split('\t')[5]
-    if "S" in CIGAR:
-        right_sc = re.search('\d+S$', CIGAR)
-        if right_sc is not None:
-            new_pos = pos - int(right_sc.group().split('S')[0])
-            return(new_pos)
-        else: 
-            return(pos)
-    else: 
-        return(pos)
+    adj = [int(i[:-1]) for i in re.findall("\d+S$|\d+M|\d+D|\d+N", CIGAR)]
+    new_pos = pos + sum(adj)
+    return(new_pos)
+
 
 #sort input sam file by UMI, GNAME, POS w/bash script
 call(['bash', 'sort.sh', in_sam])
@@ -84,7 +79,7 @@ with open(sorted_sam, 'rt') as sorted_sam:
             flag = int(line.split('\t')[1])
             if ((flag & 4) == 4): #write unmapped reads to misindexed
                 misindexed.write(line)
-                qual_count += 0
+                qual_count += 1
             else:
                 umi = re.search('[ATCGN]+$', line.split('\t')[0]).group()
                 if umi not in umi_dict: #write reads w/unknown umis to misindexed
